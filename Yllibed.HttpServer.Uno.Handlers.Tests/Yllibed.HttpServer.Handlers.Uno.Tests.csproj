@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Yllibed.HttpServer.Handlers.Uno\Yllibed.HttpServer.Handlers.Uno.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="xunit" />
+		<PackageReference Include="xunit.runner.visualstudio" />
+		<PackageReference Include="coverlet.collector">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="coverlet.msbuild">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Shouldly" />
+		<PackageReference Update="Microsoft.NET.Test.Sdk" VersionOverride="18.0.1" />
+	</ItemGroup>
+
+	
+	<ItemGroup>
+		<Using Include="Xunit" />
+		<Using Include="Shouldly" />
+	</ItemGroup>
+
+</Project>
