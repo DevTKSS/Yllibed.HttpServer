@@ -1,9 +1,9 @@
 {
     "msbuild-sdks": {
-        "Uno.Sdk": "6.2.29",
-        "Microsoft.NET.Sdk": "9.0.0"
+        "Uno.Sdk": "6.3.28"
     },
     "sdk": {
+        "version": "9.0.100",
         "rollForward": "latestMajor",
         "allowPrerelease": false
     }
