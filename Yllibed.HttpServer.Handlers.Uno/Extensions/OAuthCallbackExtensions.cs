@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Yllibed.Handlers.Uno.Extensions;
+namespace Yllibed.HttpServer.Handlers.Uno.Extensions;
+
 public static class OAuthCallbackExtensions
 {
 	/// <summary>

@@ -1,4 +1,4 @@
-namespace Yllibed.HttpServer.Defaults;
+namespace Yllibed.HttpServer.Handlers.Uno.Defaults;
 /// <summary>
 /// OAuth Error Response standardized error codes. <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1">4.1.2.1 Error Response</see>
 /// </summary>

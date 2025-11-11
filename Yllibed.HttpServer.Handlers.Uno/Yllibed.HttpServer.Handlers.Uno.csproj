@@ -4,6 +4,7 @@
     <TargetFrameworks>net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<Authors>$(Authors);Sonja Schweitzer</Authors>
 	<UnoFeatures>
 		Logging;
 		Authentication;

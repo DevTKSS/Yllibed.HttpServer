@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
+using Yllibed.HttpServer.Handlers.Uno.Defaults;
 
-namespace Yllibed.Handlers.Uno;
+namespace Yllibed.HttpServer.Handlers.Uno;
+
 public record OAuthCallbackHandler : IAuthCallbackHandler
 {
 	private readonly TaskCompletionSource<WebAuthenticationResult> _tcs = new();
@@ -22,7 +24,8 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 	AuthCallbackHandlerOptions options,
 	[ServiceKey] string name = AuthCallbackHandlerOptions.DefaultName)
 	{
-		if (options?.CallbackUri is not Uri uri
+		if (options.CallbackUri is null
+			|| !Uri.TryCreate(options?.CallbackUri, UriKind.Absolute, out var uri)
 			|| uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
 		{
 			throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(options));
@@ -30,12 +33,13 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 		Name = name;
 		CallbackUri = uri;
 	}
-	[Microsoft.Extensions.DependencyInjection.ActivatorUtilitiesConstructor]
+	[ActivatorUtilitiesConstructor]
 	public OAuthCallbackHandler(
 		IOptions<AuthCallbackHandlerOptions> options,
 		[ServiceKey] string name = AuthCallbackHandlerOptions.DefaultName)
 	{
-		if (options?.Value?.CallbackUri is not Uri uri
+		if (options.Value.CallbackUri is null
+			|| !Uri.TryCreate(options.Value.CallbackUri, UriKind.Absolute, out var uri)
 			|| uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
 		{
 			throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(options));
@@ -72,23 +76,7 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 			_ => new WebAuthenticationResult(requestUriString, statusCode, WebAuthenticationStatus.ErrorHttp),
 		};
 	}
-	//protected virtual uint GetStatusCode(NameValueCollection parameters) // TODO: Check if we maybe should exchange using GetParameters with return Dictionary to this method
-	//{
-	//	if (parameters.Get(OAuthErrorResponseDefaults.ErrorKey) is string error)
-	//	{
-	//		return error switch
-	//		{
-	//			OAuthErrorResponseDefaults.AccessDenied => 403,
-	//			OAuthErrorResponseDefaults.InvalidClient or OAuthErrorResponseDefaults.UnauthorizedClient or OAuthErrorResponseDefaults.InvalidScope => 401,
-	//			OAuthErrorResponseDefaults.TemporarilyUnavailable => 503,
-	//			OAuthErrorResponseDefaults.UnsupportedGrantType => 500,
-	//			_ => 400 // For all others: Bad Request
-	//		};
 
-	//	}
-
-	//	return 200;
-	//}
 	protected virtual uint GetStatusCode(IDictionary<string, string> parameters)
 	{
 		if (parameters.TryGetValue(OAuthErrorResponseDefaults.ErrorKey, out var error))
