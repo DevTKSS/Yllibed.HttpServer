@@ -1,10 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFrameworks>net9.0</TargetFrameworks>
+		<!--
+		OutputType is set to Exe, because unit test projects in xUnit.net v3 are stand-alone executables that can be directly run
+		https://xunit.net/docs/getting-started/v3/migration#stand-alone-executables
+		-->
+		<OutputType>Exe</OutputType>
+		<RootNamespace>Yllibed.HttpServer.Handlers.Uno.Tests</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -12,20 +19,24 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="xunit" />
+		<PackageReference Include="xunit.v3" />
 		<PackageReference Include="xunit.runner.visualstudio" />
-		<PackageReference Include="coverlet.collector">
+		<!--<PackageReference Include="coverlet.collector">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="coverlet.msbuild">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
+		</PackageReference>-->
 		<PackageReference Include="Shouldly" />
-		<PackageReference Update="Microsoft.NET.Test.Sdk" VersionOverride="18.0.1" />
+		<PackageReference Update="Microsoft.NET.Test.Sdk" VersionOverride="17.13.0" />
+		<!--<PackageReference Include="xunit.v3.runner.inproc.console" />-->
 	</ItemGroup>
 
+	<ItemGroup>
+		<Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
 	
 	<ItemGroup>
 		<Using Include="Xunit" />
