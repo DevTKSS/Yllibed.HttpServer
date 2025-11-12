@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Yllibed.HttpServer.Extensions; // For AddHttpHandlerAndRegister
 
 namespace Yllibed.HttpServer.Handlers.Uno.Extensions;
 
@@ -39,9 +38,7 @@ public static class OAuthCallbackExtensions
 			services.Configure(configure);
 		}
 		services.AddOAuthCallbackHandler();
-		// Ensure automatic registration when Server is created
-		services.AddHttpHandlerAndRegister<OAuthCallbackHandler>();
-		// Registration object that hooks the handler into the server upon construction (eager path)
+		// Register a singleton that wires the handler into the server on construction
 		services.AddSingleton<OAuthCallbackRegistration>();
 		return services;
 	}
@@ -49,11 +46,12 @@ public static class OAuthCallbackExtensions
 	private sealed class OAuthCallbackRegistration : IDisposable
 	{
 		private readonly IDisposable _registration;
+#pragma warning disable IDE0290 // prefer using primary constructor - aligning with existing patterns in GuardHandlerRegistration
 		public OAuthCallbackRegistration(Server server, OAuthCallbackHandler handler)
-		{
-			// Register early; Server preserves registration order
-			_registration = server.RegisterHandler(handler);
-		}
+		// Place first by registering now; Server keeps order of registration
+		=> _registration = server.RegisterHandler(handler);
+#pragma warning restore IDE0290 // prefer using primary constructor
+
 		public void Dispose() => _registration.Dispose();
 	}
 }
