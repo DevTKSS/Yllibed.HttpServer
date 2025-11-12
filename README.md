@@ -110,7 +110,8 @@ If you need to expose it on a public or untrusted network:
 - Alternatively, use a secure tunnel (SSH, Cloudflare Tunnel, etc.).
 - Bind to loopback only (127.0.0.1 / ::1) when you want to ensure local-only access.
 
-Note: Authentication/authorization is not built-in; implement it in your handlers or at the proxy layer as needed.
+> [!NOTE]
+> Authentication/authorization is not built-in; implement it in your handlers or at the proxy layer as needed.
 
 ### GuardHandler (basic request filtering)
 GuardHandler provides best-effort filtering of incoming requests, rejecting obviously problematic or oversized requests early. This is lightweight filtering against unsophisticated attacks, not comprehensive security.
@@ -239,6 +240,9 @@ services.AddYllibedHttpServer(opts =>
 - Legacy systems expecting fixed ports
 - Load balancer configurations requiring static endpoints
 - Development scenarios where you need predictable URLs
+
+> [!IMPORTANT]
+> Remark: Only one `Server` instance (per address family) can bind to a given fixed port. Attempting to start a second server or test on the same port (e.g., two OAuth flows both forcing port 5001) will throw a `System.Net.Sockets.SocketException` (address already in use). Use dynamic ports (`Port = 0`) unless an OAuth provider mandates an exact fixed redirect URI.
 
 ### Basic Configuration Example
 
@@ -450,3 +454,72 @@ Notes:
 - Caching: Cache-Control: no-cache is added by default for SSE responses unless you override it via headers.
 - Retry: The SSE spec allows the server to send a retry: <milliseconds> field to suggest a reconnection delay. This helper does not currently provide a dedicated API for retry frames. Most clients also implement their own backoff. If you need this, you can write raw lines through a custom handler or open an issue.
 - CORS: If you need cross-origin access, add appropriate headers (e.g., Access-Control-Allow-Origin) via the headers parameter when starting the SSE session.
+
+### OAuthCallbackHandler Usage
+
+The `OAuthCallbackHandler` helps capture an OAuth2.0 (or similar) redirect to a localhost HTTP endpoint and provides a `WaitForCallbackAsync()` method to retrieve the result once the browser hits the callback URL.
+
+Minimal manual registration (fixed port example):
+```csharp
+var server = new Server(5001); // Fixed port must match the registered redirect URI with the provider
+var callbackHandler = new OAuthCallbackHandler(new Uri("http://localhost:5001/oauth/callback"));
+server.RegisterHandler(callbackHandler);
+var (uri4, _) = server.Start();
+Console.WriteLine($"Listening for OAuth redirect at: {callbackHandler.CallbackUri}");
+
+// Later, wait for the incoming redirect
+var result = await callbackHandler.WaitForCallbackAsync();
+Console.WriteLine($"Status: {result.ResponseStatus}, Raw URI: {result.ResponseData}");
+```
+
+Using Microsoft DI with automatic handler registration:
+```csharp
+var services = new ServiceCollection();
+services.AddYllibedHttpServer(opts =>
+{
+ opts.Port = 5001; // Fixed port required if provider expects an exact redirect URI
+ opts.Hostname4 = "localhost"; // Host portion of the redirect URI
+ opts.BindAddress4 = IPAddress.Loopback; // Listen only on loopback for safety
+});
+
+// Configure the expected callback URI (must match exactly what you registered with the OAuth provider)
+services.AddOAuthCallbackHandlerAndRegister(o =>
+{
+ o.CallbackUri = "http://localhost:5001/oauth/callback"; // or https:// if provider redirects securely
+});
+
+var sp = services.BuildServiceProvider();
+var server = sp.GetRequiredService<Server>();
+var (uri4, _) = server.Start();
+Console.WriteLine($"Server started: {uri4}");
+
+// Obtain the handler via DI and await the redirect
+var authHandler = sp.GetRequiredService<IAuthCallbackHandler>();
+var authResult = await authHandler.WaitForCallbackAsync();
+
+switch (authResult.ResponseStatus)
+{
+ case WebAuthenticationStatus.Success:
+ Console.WriteLine("OAuth flow succeeded.");
+ break;
+ case WebAuthenticationStatus.UserCancel:
+ Console.WriteLine("User cancelled the flow.");
+ break;
+ case WebAuthenticationStatus.ErrorHttp:
+ Console.WriteLine($"HTTP error: {authResult.ResponseErrorDetail}");
+ break;
+ default:
+ Console.WriteLine("Unexpected status.");
+ break;
+}
+```
+
+> [!NOTE]
+>
+> - Ensure the fixed port and path (`/oauth/callback` in the examples) match exactly the redirect URI registered with the OAuth provider.
+> - `WaitForCallbackAsync()` returns once the first matching request arrives; subsequent requests are ignored for result completion.
+> - The handler sets a simple text response indicating success, cancellation, or error so users can close the browser tab.
+> - You can provide an HTTPS redirect URI (`https://localhost:5001/...`) if the OAuth provider enforces HTTPS; the handler accepts both HTTP and HTTPS schemes for the configured callback.
+> - When running tests or multiple local flows, prefer dynamic ports unless the provider requires a fixed one.
+> [!IMPORTANT]
+> Only one Server instance (per address family) can bind to a given fixed port. Attempting to start a second server on the same port will throw a System.Net.Sockets.SocketException (address already in use).
