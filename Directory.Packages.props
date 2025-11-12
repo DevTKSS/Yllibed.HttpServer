@@ -14,8 +14,11 @@
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.8" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.9" />
     <PackageVersion Include="System.ValueTuple" Version="4.6.1" />
-	<PackageVersion Include="xunit" Version="2.9.2" />
-	<PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
-	<PackageVersion Include="Shouldly" Version="4.3.0" />
+
+  </ItemGroup>
+  <ItemGroup Label="xUnit Testing">
+    <PackageVersion Include="xunit.v3" Version="3.2.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
 </Project>

@@ -1,60 +1,59 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Yllibed.HttpServer.Extensions; // For AddHttpHandlerAndRegister
 
 namespace Yllibed.HttpServer.Handlers.Uno.Extensions;
 
+/// <summary>
+/// Extensions to configure OAuthCallbackHandler via Microsoft DI (aligned with GuardExtensions pattern).
+/// </summary>
 public static class OAuthCallbackExtensions
 {
 	/// <summary>
-	/// Adds the <see cref="OAuthCallbackHandler"/> to the service collection and registers it as an <see cref="IHttpHandler"/>.
+	/// Registers OAuthCallbackHandler with options support and exposes it as both its concrete type and as IAuthCallbackHandler.
 	/// </summary>
-	/// <param name="services">The <see cref="IServiceCollection"/> to which the handler will be added.</param>
-	/// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
 	public static IServiceCollection AddOAuthCallbackHandler(this IServiceCollection services)
 	{
-		services.AddSingleton(sp => new OAuthCallbackHandler(sp.GetRequiredService<IOptions<AuthCallbackHandlerOptions>>()));
-		services.AddSingleton<IAuthCallbackHandler>(sp => sp.GetRequiredService<OAuthCallbackHandler>()); // Register as IAuthCallbackHandler so eventual consumers can get it as expected Interface,
-																										  // which provides the callback awaiting functionality at registration in WebAuthenticationBrokerProvider
-		return services;
-	}
-	/// <summary>
-	/// Registers an <see cref="OAuthCallbackHandler"/> Keyed Singleton and its associated dependencies in the service collection with the specified name as Options key and service key.
-	/// </summary>
-	/// <param name="services">The <see cref="IServiceCollection"/> to which the handler and dependencies will be added.</param>
-	/// <param name="name">The name used to retrieve the <see cref="AuthCallbackHandlerOptions"/> configuration.<br/>
-	/// Defaults to <see cref="AuthCallbackHandlerOptions.DefaultName"/>.</param>
-	/// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
-	public static IServiceCollection AddOAuthCallbackHandler(this IServiceCollection services, string name = AuthCallbackHandlerOptions.DefaultName)
-	{
-		services.AddSingleton(sp => new OAuthCallbackHandler(sp.GetRequiredService<IOptionsSnapshot<AuthCallbackHandlerOptions>>().Get(name)));
-		services.AddKeyedSingleton<IAuthCallbackHandler>(name, (sp, _) => sp.GetRequiredService<OAuthCallbackHandler>()); // Register as IAuthCallbackHandler so eventual consumers can get it as expected Interface,
-																														  // which provides the callback awaiting functionality at registration in WebAuthenticationBrokerProvider
+		services.AddSingleton<OAuthCallbackHandler>(sp => new OAuthCallbackHandler(sp.GetRequiredService<IOptions<AuthCallbackHandlerOptions>>()));
+		services.AddSingleton<IAuthCallbackHandler>(sp => sp.GetRequiredService<OAuthCallbackHandler>());
 		return services;
 	}
 
-	public static IServiceCollection AddOAuthCallbackHandler<TService>(this IServiceCollection services, Action<AuthCallbackHandlerOptions> configureOptions)
-		where TService : class, IAuthCallbackHandler
+	/// <summary>
+	/// Registers OAuthCallbackHandler with configuration delegate.
+	/// </summary>
+	public static IServiceCollection AddOAuthCallbackHandler(this IServiceCollection services, Action<AuthCallbackHandlerOptions> configure)
 	{
-		services.Configure(configureOptions);
+		services.Configure(configure);
 		return services.AddOAuthCallbackHandler();
 	}
-	public static IServiceCollection AddOAuthCallbackHandlerAndRegister<TService>(this IServiceCollection services, string name = AuthCallbackHandlerOptions.DefaultName, Action<AuthCallbackHandlerOptions>? configureOptions = null)
-		where TService : class, IAuthCallbackHandler
+
+	/// <summary>
+	/// Registers OAuthCallbackHandler and automatically wires it into the Server pipeline.
+	/// Avoids manual resolution and explicit Server.RegisterHandler calls by consumers.
+	/// </summary>
+	public static IServiceCollection AddOAuthCallbackHandlerAndRegister(this IServiceCollection services, Action<AuthCallbackHandlerOptions>? configure = null)
 	{
-		if (configureOptions != null)
+		if (configure != null)
 		{
-			services.Configure(configureOptions);
+			services.Configure(configure);
 		}
-		services.AddOAuthCallbackHandler(name);
-		// Register a singleton that wires the handler into the server on construction
-		services.AddSingleton<OAuthCallbackHandlerRegistration>();
+		services.AddOAuthCallbackHandler();
+		// Ensure automatic registration when Server is created
+		services.AddHttpHandlerAndRegister<OAuthCallbackHandler>();
+		// Registration object that hooks the handler into the server upon construction (eager path)
+		services.AddSingleton<OAuthCallbackRegistration>();
 		return services;
 	}
-	private sealed class OAuthCallbackHandlerRegistration : IDisposable
+
+	private sealed class OAuthCallbackRegistration : IDisposable
 	{
 		private readonly IDisposable _registration;
-		public OAuthCallbackHandlerRegistration(Server server, OAuthCallbackHandler handler) =>
-			// Place first by registering now; Server keeps order of registration
+		public OAuthCallbackRegistration(Server server, OAuthCallbackHandler handler)
+		{
+			// Register early; Server preserves registration order
 			_registration = server.RegisterHandler(handler);
+		}
 		public void Dispose() => _registration.Dispose();
 	}
 }

@@ -8,10 +8,10 @@
     <File Path="version.json" />
     <File Path="Directory.Packages.props" />
   </Folder>
-  <Project Path="Yllibed.HttpServer.Handlers.Uno/Yllibed.HttpServer.Handlers.Uno.csproj" Id="337a3202-2c6c-4f35-8fa2-cb4d98234fb7" />
+  <Project Path="Yllibed.HttpServer.Handlers.Uno/Yllibed.HttpServer.Handlers.Uno.csproj" />
   <Project Path="Yllibed.HttpServer.Json.Tests\Yllibed.HttpServer.Json.Tests.csproj" />
   <Project Path="Yllibed.HttpServer.Json\Yllibed.HttpServer.Json.csproj" />
   <Project Path="Yllibed.HttpServer.Tests\Yllibed.HttpServer.Tests.csproj" />
-  <Project Path="Yllibed.HttpServer.Uno.Handlers.Tests/Yllibed.HttpServer.Handlers.Uno.Tests.csproj" Id="264d7e1c-921d-4789-a1b0-a8e56dced7e8" />
+  <Project Path="Yllibed.HttpServer.Handlers.Uno.Tests/Yllibed.HttpServer.Handlers.Uno.Tests.csproj" />
   <Project Path="Yllibed.HttpServer\Yllibed.HttpServer.csproj" />
 </Solution>
