@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 		<PackageId>Yllibed.HttpServer.Json</PackageId>
 		<Title>Yllibed HttpServer Json Adapter</Title>
 		<Product>Yllibed HttpServer Json Adapter</Product>

@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
 		<PackageId>Yllibed.HttpServer</PackageId>
 		<Title>Yllibed HttpServer</Title>
 		<Product>Yllibed HttpServer</Product>
@@ -10,6 +11,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 
 		<InternalsVisibleTo>$(InternalsVisibleTo);Yllibed.HttpServer.Json;Yllibed.HttpServer.Tests</InternalsVisibleTo>
+		<NoWarn>NU1510</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,4 +25,5 @@
 		<PackageReference Include="System.Collections.Immutable" />
 		<PackageReference Include="System.ValueTuple" />
 	</ItemGroup>
+
 </Project>
