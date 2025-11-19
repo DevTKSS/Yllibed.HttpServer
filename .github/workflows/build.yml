@@ -10,22 +10,21 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            dotnet: [ '8.x' , '9.x' ]
+        name: Dotnet ${{ matrix.dotnet }} Build and Test
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v5
               with:
                   fetch-depth: 0 # Need full history for GitVersion
 
-            - name: Setup .NET 8.0
-              uses: actions/setup-dotnet@v3
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v5
               with:
-                  dotnet-version: '8.0'
-
-            - name: Setup .NET 9.0
-              uses: actions/setup-dotnet@v3
-              with:
-                  dotnet-version: '9.0'
+                dotnet-version: ${{ matrix.dotnet }}
 
             - name: Build
               run: dotnet build Yllibed.HttpServer.slnx /p:Configuration=Release
@@ -62,9 +61,9 @@ jobs:
                   path: ./nuget-packages
 
             - name: Setup .NET
-              uses: actions/setup-dotnet@v3
+              uses: actions/setup-dotnet@v5
               with:
-                  dotnet-version: '8.0'
+                  dotnet-version: '8.x'
 
             - name: Push NuGet packages
               env:
