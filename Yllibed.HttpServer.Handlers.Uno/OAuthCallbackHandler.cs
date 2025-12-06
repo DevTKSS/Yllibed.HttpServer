@@ -1,6 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Yllibed.HttpServer.Handlers.Uno.Defaults;
-
 namespace Yllibed.HttpServer.Handlers.Uno;
 
 public record OAuthCallbackHandler : IAuthCallbackHandler
@@ -8,21 +5,17 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 	private readonly TaskCompletionSource<WebAuthenticationResult> _tcs = new();
 	public Uri CallbackUri { get; init; }
 
-	public string Name { get; init; }
-
-	public OAuthCallbackHandler(Uri callbackUri, string name = AuthCallbackHandlerOptions.DefaultName)
+	public OAuthCallbackHandler(Uri callbackUri)
 	{
 		if (callbackUri is null || callbackUri.Scheme != Uri.UriSchemeHttp && callbackUri.Scheme != Uri.UriSchemeHttps)
 		{
 			throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(callbackUri));
 		}
-		Name = name;
 		CallbackUri = callbackUri;
 	}
 
 	public OAuthCallbackHandler(
-	AuthCallbackHandlerOptions options,
-	[ServiceKey] string name = AuthCallbackHandlerOptions.DefaultName)
+	AuthCallbackHandlerOptions options)
 	{
 		if (options.CallbackUri is null
 			|| !Uri.TryCreate(options?.CallbackUri, UriKind.Absolute, out var uri)
@@ -30,13 +23,11 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 		{
 			throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(options));
 		}
-		Name = name;
 		CallbackUri = uri;
 	}
 	[ActivatorUtilitiesConstructor]
 	public OAuthCallbackHandler(
-		IOptions<AuthCallbackHandlerOptions> options,
-		[ServiceKey] string name = AuthCallbackHandlerOptions.DefaultName)
+		IOptions<AuthCallbackHandlerOptions> options)
 	{
 		if (options.Value.CallbackUri is null
 			|| !Uri.TryCreate(options.Value.CallbackUri, UriKind.Absolute, out var uri)
@@ -44,7 +35,6 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 		{
 			throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(options));
 		}
-		Name = name;
 		CallbackUri = uri;
 	}
 
