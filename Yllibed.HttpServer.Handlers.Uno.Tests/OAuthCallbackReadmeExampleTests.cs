@@ -1,9 +1,3 @@
-using System.Net;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Yllibed.HttpServer.Extensions;
-using Yllibed.HttpServer.Handlers.Uno.Extensions;
-
 namespace Yllibed.HttpServer.Handlers.Uno.Tests;
 
 public class OAuthCallbackReadmeExampleTests
