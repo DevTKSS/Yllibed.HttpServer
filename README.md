@@ -485,7 +485,7 @@ services.AddYllibedHttpServer(opts =>
 // Configure the expected callback URI (must match exactly what you registered with the OAuth provider)
 services.AddOAuthCallbackHandlerAndRegister(o =>
 {
- o.CallbackUri = "http://localhost:5001/oauth/callback"; // or https:// if provider redirects securely
+ o.CallbackUri = "http://localhost:5001/oauth/callback"; // Server will always use http scheme, no https!
 });
 
 var sp = services.BuildServiceProvider();
@@ -519,7 +519,6 @@ switch (authResult.ResponseStatus)
 > - Ensure the fixed port and path (`/oauth/callback` in the examples) match exactly the redirect URI registered with the OAuth provider.
 > - `WaitForCallbackAsync()` returns once the first matching request arrives; subsequent requests are ignored for result completion.
 > - The handler sets a simple text response indicating success, cancellation, or error so users can close the browser tab.
-> - You can provide an HTTPS redirect URI (`https://localhost:5001/...`) if the OAuth provider enforces HTTPS; the handler accepts both HTTP and HTTPS schemes for the configured callback.
 > - When running tests or multiple local flows, prefer dynamic ports unless the provider requires a fixed one.
 > [!IMPORTANT]
 > Only one Server instance (per address family) can bind to a given fixed port. Attempting to start a second server on the same port will throw a System.Net.Sockets.SocketException (address already in use).
