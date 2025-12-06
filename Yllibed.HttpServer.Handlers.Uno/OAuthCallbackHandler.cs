@@ -57,7 +57,7 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 
 		return Task.CompletedTask;
 	}
-	protected virtual WebAuthenticationResult GetWebAuthenticationResult(uint statusCode, string requestUriString)
+	private WebAuthenticationResult GetWebAuthenticationResult(uint statusCode, string requestUriString)
 	{
 		return statusCode switch
 		{
@@ -67,7 +67,7 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 		};
 	}
 
-	protected virtual uint GetStatusCode(IDictionary<string, string> parameters)
+	private uint GetStatusCode(IDictionary<string, string> parameters)
 	{
 		if (parameters.TryGetValue(OAuthErrorResponseDefaults.ErrorKey, out var error))
 		{
@@ -84,7 +84,7 @@ public record OAuthCallbackHandler : IAuthCallbackHandler
 
 		return 200;
 	}
-	protected virtual string GetWebAuthenticationResponseMessage(WebAuthenticationResult result)
+	private string GetWebAuthenticationResponseMessage(WebAuthenticationResult result)
 	{
 		return result.ResponseStatus switch
 		{
