@@ -1,16 +1,15 @@
-﻿<Project Sdk="Uno.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
  
   <PropertyGroup>
     <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<Authors>$(Authors);Sonja Schweitzer</Authors>
-	<UnoFeatures>
-		Logging;
-		Authentication;
-	</UnoFeatures>
   </PropertyGroup>
 	<ItemGroup Label="Projects">
 	  <ProjectReference Include="..\Yllibed.HttpServer\Yllibed.HttpServer.csproj" />
+	</ItemGroup>
+	<ItemGroup Label="NuGet Packages">
+		<PackageReference Include="Uno.Extensions.Authentication.WinUI" />
 	</ItemGroup>
 </Project>
