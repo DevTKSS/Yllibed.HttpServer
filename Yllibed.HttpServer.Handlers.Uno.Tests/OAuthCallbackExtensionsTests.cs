@@ -1,9 +1,3 @@
-using Yllibed.HttpServer.Handlers.Uno.Extensions;
-using Microsoft.Extensions.Options;
-using System.Net;
-using Microsoft.Extensions.DependencyInjection;
-using Yllibed.HttpServer.Extensions; // For AddYllibedHttpServer
-
 namespace Yllibed.HttpServer.Handlers.Uno.Tests;
 
 public class OAuthCallbackExtensionsTests
@@ -53,5 +47,47 @@ public class OAuthCallbackExtensionsTests
 		result.ResponseErrorDetail.ShouldBe((uint)200);
 		result.ResponseData.ShouldNotBeNull();
 		result.ResponseData!.ShouldContain("code=abc");
+	}
+
+	[Fact]
+	public void AddOAuthCallbackHandlerAndRegister_WithConfigure_RegistersHandlerAndAppliesOptions()
+	{
+		var services = new ServiceCollection();
+
+		services.AddOAuthCallbackHandlerAndRegister(o => o.CallbackUri = "http://localhost/configured-callback");
+
+		using var sp = services.BuildServiceProvider();
+		var concrete = sp.GetService<OAuthCallbackHandler>();
+		var asInterface = sp.GetService<IAuthCallbackHandler>();
+
+		concrete.ShouldNotBeNull();
+		asInterface.ShouldNotBeNull();
+		ReferenceEquals(concrete, asInterface).ShouldBeTrue();
+		concrete!.CallbackUri.ShouldBe(new Uri("http://localhost/configured-callback"));
+	}
+
+	[Fact]
+	public async Task AddOAuthCallbackHandlerAndRegister_WithConfigure_RegistersIntoServerPipeline()
+	{
+		var services = new ServiceCollection();
+		services.AddLogging();
+
+		services.AddYllibedHttpServer();
+		services.AddOAuthCallbackHandlerAndRegister(o => o.CallbackUri = "http://localhost/configured-callback");
+
+		await using var sp = services.BuildServiceProvider();
+		var server = sp.GetRequiredService<Server>();
+		var (uri4, _) = server.Start();
+		var callbackUri = new Uri(uri4, "/configured-callback?code=xyz");
+
+		var client = new HttpClient();
+		var response = await client.GetAsync(callbackUri, TestContext.Current.CancellationToken);
+		response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+		var handler = sp.GetRequiredService<IAuthCallbackHandler>();
+		var result = await handler.WaitForCallbackAsync();
+		result.ResponseErrorDetail.ShouldBe((uint)200);
+		result.ResponseData.ShouldNotBeNull();
+		result.ResponseData!.ShouldContain("code=xyz");
 	}
 }
