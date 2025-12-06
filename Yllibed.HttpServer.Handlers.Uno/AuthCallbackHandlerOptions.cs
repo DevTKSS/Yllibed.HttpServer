@@ -9,6 +9,6 @@ public record AuthCallbackHandlerOptions
 	/// Configures the expected URI for authentication Callbacks.
 	/// </summary>
 	[Required, Url]
-	public string? CallbackUri { get; init; }
+	public string? CallbackUri { get; set; }
 
 }
